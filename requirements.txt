@@ -3,17 +3,20 @@ opencv-python-headless>=4.9.0
 Pillow>=10.0.0
 numpy>=1.24.0
 
-# VLM APIs
+# Networking & VLM APIs
+httpx>=0.27.0
 google-genai>=1.0.0
 openai>=1.30.0
 
-# Core utilities & environment
+# Environment & Models
 python-dotenv>=1.0.0
 pydantic>=2.0.0
 
-# Presentation & UI
+# Dashboard & UI
 streamlit>=1.35.0
 plotly>=5.20.0
 
 # Quality & Tooling
 ruff>=0.4.0
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
