@@ -162,4 +162,9 @@ class VLMClient:
             if attempt < self.max_retries:
                 backoff = (2 ** attempt) + random.uniform(0, 0.5)
                 await asyncio.sleep(backoff)
-        raise VLMError(f"All {self.max_retries + 1} attempts failed: {last_error}")
+        detail = (
+            f"{type(last_error).__name__}: {last_error!r}"
+            if last_error is not None
+            else "no error captured"
+        )
+        raise VLMError(f"All {self.max_retries + 1} attempts failed: {detail}")

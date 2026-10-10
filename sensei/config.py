@@ -62,7 +62,7 @@ class Config:
 
     # --- runtime --------------------------------------------------------
     max_concurrency: int = 1      # 1 for 8GB VRAM (avoid KV cache overflow)
-    timeout_s: float = 90.0
+    timeout_s: float = 240.0      # slow if the model is CPU-offloaded; see ollama ps
     max_retries: int = 4
     cache_dir: str = ".cache/vlm"
     skip_api: bool = False  # dry-run mode: fill the skeleton without calls
@@ -86,7 +86,7 @@ class Config:
             context_padding=_env_float("SENSEI_CONTEXT_PAD", 0.30),
             include_context=_env_bool("SENSEI_INCLUDE_CONTEXT", True),
             max_concurrency=_env_int("SENSEI_CONCURRENCY", 1),
-            timeout_s=_env_float("SENSEI_TIMEOUT_S", 90.0),
+            timeout_s=_env_float("SENSEI_TIMEOUT_S", 240.0),
             max_retries=_env_int("SENSEI_RETRIES", 4),
             cache_dir=_env("SENSEI_CACHE_DIR", ".cache/vlm"),
             skip_api=_env_bool("SENSEI_SKIP_API", False),

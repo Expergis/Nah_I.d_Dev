@@ -180,4 +180,9 @@ class OllamaClient:
                 last_error = exc
             if attempt < self.max_retries:
                 await asyncio.sleep((2 ** attempt) + random.uniform(0, 0.5))
-        raise OllamaError(f"All {self.max_retries + 1} attempts failed: {last_error}")
+        detail = (
+            f"{type(last_error).__name__}: {last_error!r}"
+            if last_error is not None
+            else "no error captured"
+        )
+        raise OllamaError(f"All {self.max_retries + 1} attempts failed: {detail}")

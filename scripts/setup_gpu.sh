@@ -44,21 +44,39 @@ if ! command -v ollama &>/dev/null; then
 fi
 ollama --version
 
-# Set VRAM-optimization env vars for 8GB GPU
+# VRAM-optimized server settings for an 8GB GPU.
+# A systemd service does NOT inherit shell exports, so when Ollama runs as a
+# service we must write a drop-in override and restart it. Otherwise fall
+# back to a local `ollama serve`, which does inherit the exports.
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_MAX_LOADED_MODELS=1
 export OLLAMA_KEEP_ALIVE=-1
 export OLLAMA_FLASH_ATTENTION=1
 export OLLAMA_KV_CACHE_TYPE=q8_0
 
-# Start the Ollama service if not already running
-if ! curl -s http://localhost:11434/api/tags &>/dev/null; then
-    echo "Starting Ollama service with VRAM-optimized settings..."
-    sudo systemctl start ollama 2>/dev/null || sudo systemctl enable --now ollama 2>/dev/null || \
-        (nohup ollama serve > /tmp/ollama.log 2>&1 &)
-    sleep 2
+if systemctl list-unit-files 2>/dev/null | grep -q '^ollama\.service'; then
+    echo "Ollama is a systemd service: applying drop-in override + restart..."
+    sudo mkdir -p /etc/systemd/system/ollama.service.d
+    sudo tee /etc/systemd/system/ollama.service.d/override.conf >/dev/null <<'EOF'
+[Service]
+Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_KEEP_ALIVE=-1"
+Environment="OLLAMA_FLASH_ATTENTION=1"
+Environment="OLLAMA_KV_CACHE_TYPE=q8_0"
+EOF
+    sudo systemctl daemon-reload
+    sudo systemctl restart ollama
+else
+    if ! curl -s http://localhost:11434/api/tags &>/dev/null; then
+        echo "Starting Ollama server with VRAM-optimized settings..."
+        nohup ollama serve > /tmp/ollama.log 2>&1 &
+        sleep 2
+    fi
 fi
 echo "Ollama reachable: $(curl -s http://localhost:11434/api/tags 2>/dev/null | head -c 80 || true)..."
+echo "Service env: $(systemctl show ollama -p Environment 2>/dev/null || echo 'n/a (not a service)')"
+echo "Check split with: ollama ps   (want 100% GPU)"
 
 # ---------------------------------------------------------------------------
 step "[3/6] Pull models (primary, fallback, second-opinion)"
