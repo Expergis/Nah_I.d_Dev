@@ -93,7 +93,6 @@ class LlamaCppClient:
             "model": self.model,
             "messages": [{"role": "user", "content": content_parts}],
             "temperature": temperature,
-            "response_format": {"type": "json_object"},
         }
 
     # -- response parsing -------------------------------------------------
@@ -113,8 +112,15 @@ class LlamaCppClient:
 
         try:
             return json.loads(raw_text)
-        except json.JSONDecodeError as exc:
-            raise LlamaCppError(f"Model returned non-JSON: {raw_text[:300]!r}") from exc
+        except json.JSONDecodeError:
+            # Fallback: search for first { ... } block
+            m = re.search(r"\{.*\}", raw_text, flags=re.DOTALL)
+            if m:
+                try:
+                    return json.loads(m.group(0))
+                except json.JSONDecodeError:
+                    pass
+            raise LlamaCppError(f"Model returned non-JSON: {raw_text[:300]!r}")
 
     # -- main API ---------------------------------------------------------
     async def ask_json(
