@@ -67,6 +67,7 @@ class Config:
     timeout_s: float = 90.0
     max_retries: int = 4
     cache_dir: str = ".cache/vlm"
+    no_cache: bool = False
     skip_api: bool = False  # dry-run mode: fill the skeleton without calls
 
     @classmethod

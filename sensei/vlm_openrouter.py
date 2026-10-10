@@ -32,12 +32,14 @@ class OpenRouterClient:
         timeout_s: float = 90.0,
         max_retries: int = 4,
         cache_dir: str = ".cache/vlm",
+        no_cache: bool = False,
     ):
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY is not set")
         self.model = model
         self.timeout_s = timeout_s
         self.max_retries = max_retries
+        self.no_cache = no_cache
         self._cache_dir = Path(cache_dir)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
         self._http = httpx.AsyncClient(
@@ -62,7 +64,16 @@ class OpenRouterClient:
         return self._cache_dir / f"{h.hexdigest()}.json"
 
     def _request_body(self, prompt: str, images: list[bytes], temperature: float) -> dict:
-        content_parts: list[dict] = [{"type": "text", "text": prompt + "\n\nRespond with valid JSON only."}]
+        schema_instruction = (
+            "\n\nReturn EXACTLY a JSON object with this structure:\n"
+            "{\n"
+            '  "reason": "short visual rationale",\n'
+            '  "compliance": "compliant" | "noncompliant" | "uncertain",\n'
+            '  "stock_level": "empty" | "half" | "full",\n'
+            '  "coverage_percent": <number 0-100>\n'
+            "}"
+        )
+        content_parts: list[dict] = [{"type": "text", "text": prompt + schema_instruction}]
         for image in images:
             b64 = base64.b64encode(image).decode("ascii")
             content_parts.append({
@@ -104,7 +115,7 @@ class OpenRouterClient:
     ) -> dict:
         """One completion via OpenRouter with disk caching and retry logic."""
         cache_file = self._cache_file(prompt, images, temperature)
-        if cache_file.exists():
+        if not self.no_cache and cache_file.exists():
             return json.loads(cache_file.read_text(encoding="utf-8"))
 
         body = self._request_body(prompt, images, temperature)

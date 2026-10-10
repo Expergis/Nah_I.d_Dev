@@ -35,7 +35,10 @@ env/
 # Data files (images & raw data)
 data/
 cache/
+.cache/**
 output/
+outputs/
+predictions.json
 *.jpg
 *.jpeg
 *.png

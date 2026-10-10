@@ -28,9 +28,15 @@ from .prompting import build_prompt
 from .vlm import VLMClient, VLMError
 from .vlm_openrouter import OpenRouterClient
 
+try:
+    from .vlm_ollama import OllamaClient  # type: ignore
+except ImportError:
+    OllamaClient = None  # type: ignore
+
 log = logging.getLogger(__name__)
 
-Backend = VLMClient | OllamaClient | OpenRouterClient
+Backend = VLMClient | OpenRouterClient
+
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -134,10 +140,20 @@ async def process_area(
         if isinstance(result, Exception):
             log.warning("sample failed for %s: %s", area.area_id, result)
             continue
-        level = result.get("stock_level")
+        level = str(result.get("stock_level") or result.get("stock") or "").lower().strip()
+        if not level and "coverage_percent" in result:
+            try:
+                cov = float(result["coverage_percent"])
+                level = "empty" if cov <= 15 else ("half" if cov <= 70 else "full")
+            except (ValueError, TypeError):
+                pass
+
         if level in STOCK_LEVELS:
             votes_stock[level] = votes_stock.get(level, 0) + 1
-        compliance = result.get("compliance")
+
+        compliance = str(result.get("compliance") or "").lower().strip()
+        if not compliance and "planogram_compliant" in result:
+            compliance = "compliant" if result["planogram_compliant"] else "noncompliant"
         if compliance in COMPLIANCE_LABELS:
             votes_comp[compliance] = votes_comp.get(compliance, 0) + 1
 
@@ -225,8 +241,11 @@ async def run(
                 timeout_s=cfg.timeout_s,
                 max_retries=cfg.max_retries,
                 cache_dir=cfg.cache_dir,
+                no_cache=cfg.no_cache,
             )
-        else:
+        elif cfg.backend == "ollama":
+            if OllamaClient is None:
+                raise RuntimeError("Ollama backend is not installed on this branch. Use --backend gemini or --backend openrouter.")
             client = OllamaClient(
                 model=cfg.ollama_model,
                 base_url=cfg.ollama_url,
@@ -239,8 +258,10 @@ async def run(
                 await client.aclose()
                 raise RuntimeError(
                     f"Ollama not reachable at {cfg.ollama_url}. "
-                    "Start it (setup_gpu.ps1) or use SENSEI_BACKEND=gemini."
+                    "Start it or use --backend gemini / --backend openrouter."
                 )
+        else:
+            raise ValueError(f"Unknown backend: {cfg.backend}. Choose 'gemini', 'openrouter', or 'ollama'.")
 
     semaphore = asyncio.Semaphore(cfg.max_concurrency)
     try:

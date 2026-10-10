@@ -40,6 +40,7 @@ def main() -> int:
     parser.add_argument("--backend", choices=["gemini", "openrouter", "ollama"], default=None,
                         help="Backend to use: gemini, openrouter, or ollama")
     parser.add_argument("--model", default=None, help="VLM model identifier override")
+    parser.add_argument("--no-cache", action="store_true", help="Bypass local disk cache and force fresh API calls")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose debug logging")
     args = parser.parse_args()
 
@@ -49,6 +50,8 @@ def main() -> int:
     )
 
     overrides: dict = {}
+    if args.no_cache:
+        overrides["no_cache"] = True
     if args.dry_run:
         overrides["skip_api"] = True
     if args.samples is not None:
