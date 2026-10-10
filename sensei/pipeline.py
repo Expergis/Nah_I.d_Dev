@@ -26,8 +26,11 @@ from .output import make_skeleton, validate_output
 from .planogram import Planogram, PlanogramArea
 from .prompting import build_prompt
 from .vlm import VLMClient, VLMError
+from .vlm_openrouter import OpenRouterClient
 
 log = logging.getLogger(__name__)
+
+Backend = VLMClient | OllamaClient | OpenRouterClient
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -207,13 +210,37 @@ async def run(
 
     client: VLMClient | None = None
     if not cfg.skip_api:
-        client = VLMClient(
-            model=cfg.model,
-            api_key=cfg.api_key or "",
-            timeout_s=cfg.timeout_s,
-            max_retries=cfg.max_retries,
-            cache_dir=cfg.cache_dir,
-        )
+        if cfg.backend == "gemini":
+            client = VLMClient(
+                model=cfg.model,
+                api_key=cfg.api_key or "",
+                timeout_s=cfg.timeout_s,
+                max_retries=cfg.max_retries,
+                cache_dir=cfg.cache_dir,
+            )
+        elif cfg.backend == "openrouter":
+            client = OpenRouterClient(
+                model=cfg.openrouter_model,
+                api_key=cfg.openrouter_api_key or cfg.api_key or "",
+                timeout_s=cfg.timeout_s,
+                max_retries=cfg.max_retries,
+                cache_dir=cfg.cache_dir,
+            )
+        else:
+            client = OllamaClient(
+                model=cfg.ollama_model,
+                base_url=cfg.ollama_url,
+                timeout_s=cfg.timeout_s,
+                max_retries=cfg.max_retries,
+                cache_dir=cfg.cache_dir,
+                num_ctx=cfg.ollama_num_ctx,
+            )
+            if not await client.ping():
+                await client.aclose()
+                raise RuntimeError(
+                    f"Ollama not reachable at {cfg.ollama_url}. "
+                    "Start it (setup_gpu.ps1) or use SENSEI_BACKEND=gemini."
+                )
 
     semaphore = asyncio.Semaphore(cfg.max_concurrency)
     try:

@@ -45,10 +45,16 @@ class Config:
     output_path: str = "outputs/predictions.json"
 
     # --- model ----------------------------------------------------------
+    backend: str = "gemini"   # "gemini", "openrouter", or "ollama"
     model: str = DEFAULT_MODEL
     api_key: str | None = None
-    samples: int = 3          # VLM samples (votes) per area
-    temperature: float = 0.6  # sampling temperature (diversity for votes)
+    openrouter_api_key: str | None = None
+    openrouter_model: str = "google/gemini-2.0-flash-001"
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen3-vl:8b"
+    ollama_num_ctx: int = 8192
+    samples: int = 1          # VLM samples (votes) per area
+    temperature: float = 0.2  # sampling temperature
 
     # --- geometry -------------------------------------------------------
     crop_width: int = 640
@@ -65,14 +71,26 @@ class Config:
 
     @classmethod
     def from_env(cls, **overrides: object) -> "Config":
+        backend = _env("SENSEI_BACKEND", "gemini").lower()
+        api_key = os.environ.get("GEMINI_API_KEY") or None
+        openrouter_key = os.environ.get("OPENROUTER_API_KEY") or None
+        if openrouter_key and backend == "openrouter":
+            api_key = openrouter_key
+
         cfg = cls(
             planogram_path=_env("SENSEI_PLANOGRAM", "data/planogram.json"),
             images_dir=_env("SENSEI_IMAGES_DIR", "data/images"),
             output_path=_env("SENSEI_OUTPUT", "outputs/predictions.json"),
+            backend=backend,
             model=_env("SENSEI_MODEL", DEFAULT_MODEL),
-            api_key=os.environ.get("GEMINI_API_KEY") or None,
-            samples=_env_int("SENSEI_SAMPLES", 3),
-            temperature=_env_float("SENSEI_TEMPERATURE", 0.6),
+            openrouter_api_key=openrouter_key,
+            openrouter_model=_env("OPENROUTER_MODEL", "google/gemini-2.0-flash-001"),
+            ollama_url=_env("SENSEI_OLLAMA_URL", "http://localhost:11434"),
+            ollama_model=_env("SENSEI_OLLAMA_MODEL", "qwen3-vl:8b"),
+            ollama_num_ctx=_env_int("SENSEI_OLLAMA_CTX", 8192),
+            api_key=api_key,
+            samples=_env_int("SENSEI_SAMPLES", 1),
+            temperature=_env_float("SENSEI_TEMPERATURE", 0.2),
             crop_width=_env_int("SENSEI_CROP_W", 640),
             crop_height=_env_int("SENSEI_CROP_H", 448),
             context_padding=_env_float("SENSEI_CONTEXT_PAD", 0.35),

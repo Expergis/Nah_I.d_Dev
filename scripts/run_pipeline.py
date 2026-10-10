@@ -37,6 +37,8 @@ def main() -> int:
         help="Run without API calls: tests geometry, cropping, skeleton, and safe fallbacks",
     )
     parser.add_argument("--samples", type=int, default=None, help="Number of VLM samples per area")
+    parser.add_argument("--backend", choices=["gemini", "openrouter", "ollama"], default=None,
+                        help="Backend to use: gemini, openrouter, or ollama")
     parser.add_argument("--model", default=None, help="VLM model identifier override")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose debug logging")
     args = parser.parse_args()
@@ -52,7 +54,12 @@ def main() -> int:
     if args.samples is not None:
         overrides["samples"] = args.samples
     if args.model:
-        overrides["model"] = args.model
+        if args.backend == "openrouter":
+            overrides["openrouter_model"] = args.model
+        else:
+            overrides["model"] = args.model
+    if args.backend:
+        overrides["backend"] = args.backend
     if args.images_dir:
         overrides["images_dir"] = args.images_dir
     if args.planogram:
@@ -61,10 +68,13 @@ def main() -> int:
         overrides["output_path"] = args.output
 
     cfg = Config.from_env(**overrides)
-
-    if not cfg.skip_api and not cfg.api_key:
-        print("ERROR: GEMINI_API_KEY is not set in environment or .env (or use --dry-run).", file=sys.stderr)
-        return 2
+    if not cfg.skip_api:
+        if cfg.backend == "gemini" and not cfg.api_key:
+            print("ERROR: GEMINI_API_KEY is not set (or use --dry-run / --backend openrouter).", file=sys.stderr)
+            return 2
+        elif cfg.backend == "openrouter" and not (cfg.openrouter_api_key or cfg.api_key):
+            print("ERROR: OPENROUTER_API_KEY is not set.", file=sys.stderr)
+            return 2
 
     planogram = Planogram.load(cfg.planogram_path)
     print(f"📋 Planogram: {len(planogram.cameras())} cameras, {len(planogram)} areas")
