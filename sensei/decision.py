@@ -27,6 +27,8 @@ compliant).
 """
 from __future__ import annotations
 
+import unicodedata
+
 STOCK_LEVELS = ("empty", "half", "full")
 
 STOCK_VALUES: dict[str, float] = {
@@ -82,6 +84,55 @@ def decide_compliance(votes: dict[str, int]) -> bool:
     if total == 0:
         return True
     return 2 * compliant >= total
+
+
+# ------------------------------------------------------- family-based compliance
+# Used by the local Ollama pipeline (run_local.py) where the model reports a
+# product name and we compare against the planogram locally.
+# This avoids false non-compliance on near-identical SKUs (e.g. two banana types).
+
+SPLIT: list[str] = ["BATATA DOCE", "ALHO FRANCO", "COUVE FLOR"]
+ALIAS: dict[str, str] = {"CITR": "CITRINOS", "MELAO": "MELOA", "MINI": "TOMATE"}
+
+
+def norm(s: str) -> str:
+    """Normalize a product name: strip accents, uppercase, trim."""
+    return unicodedata.normalize("NFKD", s.upper()).encode("ascii", "ignore").decode().strip()
+
+
+def family(name: str) -> str:
+    """Extract the product family (coarse grouping for compliance matching).
+
+    e.g. "BANANA CAT I" and "BANANA DA MADEIRA" -> "BANANA" (compliant)
+         "CITRINOS DO ALGARVE" and "CLEMENTINA" -> different families
+    """
+    n = norm(name)
+    for s in SPLIT:
+        if n.startswith(s):
+            return s
+    first = n.split()[0] if n.split() else n
+    return ALIAS.get(first, first)
+
+
+def sample_agrees(product: str, expected: str) -> bool:
+    """True if the model's answer is consistent with the expected product.
+
+    "empty" and "other" always agree (no positive evidence of a different
+    listed product). Otherwise compare families.
+    """
+    p = norm(product)
+    if p in ("EMPTY", "OTHER"):
+        return True
+    return family(product) == family(expected)
+
+
+def family_compliant(samples: list[dict], expected: str) -> bool:
+    """Majority-vote compliance using family matching. Ties go to compliant.
+
+    Each sample dict should have a "product" key (the model's answer).
+    """
+    agree = sum(sample_agrees(s["product"], expected) for s in samples)
+    return agree >= len(samples) / 2
 
 
 def to_output(level: str) -> tuple[str, float]:

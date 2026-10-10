@@ -59,8 +59,12 @@ class Config:
     crop_height: int = 384
     context_padding: float = 0.30  # fraction of the area span added around it
     include_context: bool = True   # also send a wider shelf view
-    fruit_threshold: float = 0.05  # 0 disables; if a crop's fruit_fraction is below
-                                   # this, skip the model and call the area empty
+    fruit_threshold: float = 0.05  # legacy; kept for backward compat
+    # Conservative colour net (speed shortcut, NOT a classifier):
+    # Override to empty+compliant only when dark > dark_threshold AND fruit < fruit_max.
+    # Avoids dark-produce misfires (aubergine, black grapes, mushrooms in shadow).
+    dark_threshold: float = 0.60   # 0 disables the net entirely
+    fruit_max: float = 0.06        # max fruit fraction allowed for the override to fire
 
 
     # --- runtime --------------------------------------------------------
@@ -89,6 +93,8 @@ class Config:
             context_padding=_env_float("SENSEI_CONTEXT_PAD", 0.30),
             include_context=_env_bool("SENSEI_INCLUDE_CONTEXT", True),
             fruit_threshold=_env_float("SENSEI_FRUIT_THR", 0.05),
+            dark_threshold=_env_float("SENSEI_DARK_THR", 0.60),
+            fruit_max=_env_float("SENSEI_FRUIT_MAX", 0.06),
             max_concurrency=_env_int("SENSEI_CONCURRENCY", 1),
             timeout_s=_env_float("SENSEI_TIMEOUT_S", 240.0),
             max_retries=_env_int("SENSEI_RETRIES", 4),

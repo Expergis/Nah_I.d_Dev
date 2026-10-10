@@ -75,6 +75,34 @@ def fruit_fraction(crop: Array, mask: Array | None = None) -> float:
     return float(fruit.mean())
 
 
+def shelf_features(crop: Array) -> dict:
+    """Cheap colour/texture signals for 'produce present'.
+
+    Returns a dict with:
+    - dark:    fraction of pixels with V < 100 (bare dark shelves score high)
+    - fruit:   fraction with S > 90 AND V > 90 (saturated, bright produce)
+    - v_std:   std of grayscale (texture proxy; log-only, not a gate)
+    - texture: Canny edge density (log-only)
+
+    Conservative override rule (speed shortcut, NOT a classifier):
+    fire ONLY when dark > 0.60 AND fruit < 0.06.
+    This avoids dark-produce misfires (aubergine, black grapes, mushrooms).
+    """
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+    dark = float((hsv[..., 2] < 100).mean())
+    fruit = float(((hsv[..., 1] > 90) & (hsv[..., 2] > 90)).mean())
+    gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+    v_std = float(gray.std())
+    edges = cv2.Canny(gray, 50, 150)
+    texture = float(edges.mean() / 255.0)
+    return {
+        "dark": round(dark, 4),
+        "fruit": round(fruit, 4),
+        "v_std": round(v_std, 1),
+        "texture": round(texture, 4),
+    }
+
+
 def context_crop(
     image: Array,
     corners: tuple | list,

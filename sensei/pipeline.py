@@ -23,7 +23,7 @@ from .decision import (
     decide_stock,
     to_output,
 )
-from .geometry import context_crop, encode_png, fruit_fraction, warp_area
+from .geometry import context_crop, encode_png, fruit_fraction, shelf_features, warp_area
 from .output import make_skeleton, validate_output
 from .planogram import Planogram, PlanogramArea
 from .timing import RunStats
@@ -152,22 +152,23 @@ async def process_area(
         image, area.corners, cfg.crop_width, cfg.crop_height
     )
 
-    # Colour safety-net: bare shelves are unambiguous. Skipping the model both
-    # saves inference cost and prevents re-priming an empty shelf as "the
-    # expected product, full". Empty => compliant (confirmed by organizers).
-    if cfg.fruit_threshold > 0:
-        frac = fruit_fraction(crop, mask)
-        if frac < cfg.fruit_threshold:
-            _record(0)
-            log.info(
-                "area %s: colour short-circuit (fruit=%.3f < %.3f) -> empty",
-                area.area_id, frac, cfg.fruit_threshold,
-            )
-            return {
-                "planogram_compliant": True,
-                "stock_level": "empty",
-                "stock_value": 0.0,
-            }
+    # Conservative colour safety-net (speed shortcut, NOT a classifier):
+    # Override to empty+compliant ONLY when dark is very high AND fruit is very low.
+    # This avoids dark-produce misfires (aubergine, black grapes, mushrooms in shadow).
+    # Empty => compliant (confirmed by organizers).
+    feats = shelf_features(crop)
+    if cfg.dark_threshold > 0 and feats["dark"] > cfg.dark_threshold and feats["fruit"] < cfg.fruit_max:
+        _record(0)
+        log.info(
+            "area %s: colour short-circuit (dark=%.3f>%.2f, fruit=%.3f<%.3f) -> empty",
+            area.area_id, feats["dark"], cfg.dark_threshold, feats["fruit"], cfg.fruit_max,
+        )
+        return {
+            "planogram_compliant": True,
+            "stock_level": "empty",
+            "stock_value": 0.0,
+        }
+    log.debug("area %s: shelf_features %s", area.area_id, feats)
 
     ctx = None
     if cfg.include_context:

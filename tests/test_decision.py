@@ -1,8 +1,14 @@
 from sensei.decision import (
+    ALIAS,
+    SPLIT,
     best_level_from_probs,
     decide_compliance,
     decide_stock,
     expected_stock_scores,
+    family,
+    family_compliant,
+    norm,
+    sample_agrees,
 )
 
 
@@ -55,3 +61,91 @@ def test_compliance_threshold():
     # uncertain votes are not evidence of mismatch
     assert decide_compliance({"compliant": 1, "uncertain": 5}) is True
     assert decide_compliance({"uncertain": 5}) is True
+
+
+# ------------------------------------------------------- family-based compliance
+
+def test_norm_strips_accents():
+    assert norm("Banana da Madeira") == "BANANA DA MADEIRA"
+    assert norm("Citrinos do Algarve") == "CITRINOS DO ALGARVE"
+    assert norm("  melão  ") == "MELAO"
+
+
+def test_family_banana_variants():
+    """Two banana SKUs should be the same family (fixes area-10 false non-compliant)."""
+    assert family("BANANA CAT I CNT KG") == "BANANA"
+    assert family("BANANA DA MADEIRA CNT KG") == "BANANA"
+    assert family("BANANA CAT I CNT KG") == family("BANANA DA MADEIRA CNT KG")
+
+
+def test_family_different_products():
+    assert family("BANANA CAT I CNT KG") != family("CITRINOS DO ALGARVE IGP LARANJA 70/95 KG")
+    assert family("TOMATE KG") != family("PIMENTO VERDE KG")
+
+
+def test_family_split_multiword():
+    """SPLIT entries take priority over first-word."""
+    assert family("BATATA DOCE KG") == "BATATA DOCE"
+    # A plain "BATATA" (if it existed) would be different
+    assert family("BATATA DOCE KG") != family("BATATA KG")
+
+
+def test_family_alias():
+    """ALIAS maps partial first-words to canonical families."""
+    assert family("CITRINOS DO ALGARVE IGP LARANJA 70/95 KG") == "CITRINOS"
+    assert family("CITRINOS 55/70 KG") == "CITRINOS"
+    assert family("MELAO PELE DE SAPO KG") == "MELOA"
+    assert family("TOMATE CEREJA KG") == "TOMATE"
+    assert family("TOMATE KG") == "TOMATE"
+
+
+def test_sample_agrees_empty_and_other():
+    """empty and other always agree (no positive evidence of mismatch)."""
+    assert sample_agrees("empty", "BANANA DA MADEIRA CNT KG") is True
+    assert sample_agrees("other", "BANANA DA MADEIRA CNT KG") is True
+
+
+def test_sample_agrees_same_family():
+    assert sample_agrees("BANANA CAT I CNT KG", "BANANA DA MADEIRA CNT KG") is True
+
+
+def test_sample_agrees_different_family():
+    assert sample_agrees("CITRINOS DO ALGARVE IGP LARANJA 70/95 KG", "BANANA DA MADEIRA CNT KG") is False
+
+
+def test_family_compliant_majority():
+    samples = [
+        {"product": "BANANA CAT I CNT KG"},
+        {"product": "BANANA DA MADEIRA CNT KG"},
+        {"product": "CITRINOS DO ALGARVE IGP LARANJA 70/95 KG"},
+    ]
+    expected = "BANANA DA MADEIRA CNT KG"
+    # 2 agree (same family), 1 disagrees -> compliant
+    assert family_compliant(samples, expected) is True
+
+
+def test_family_compliant_ties_go_compliant():
+    samples = [
+        {"product": "CITRINOS DO ALGARVE IGP LARANJA 70/95 KG"},
+        {"product": "BANANA DA MADEIRA CNT KG"},
+    ]
+    expected = "BANANA DA MADEIRA CNT KG"
+    # 1 agrees, 1 disagrees -> tie -> compliant (base rate)
+    assert family_compliant(samples, expected) is True
+
+
+def test_family_compliant_all_disagree():
+    samples = [
+        {"product": "CITRINOS DO ALGARVE IGP LARANJA 70/95 KG"},
+        {"product": "PIMENTO VERDE KG"},
+    ]
+    expected = "BANANA DA MADEIRA CNT KG"
+    # 0 agree, 2 disagree -> non-compliant
+    assert family_compliant(samples, expected) is False
+
+
+def test_family_compliant_empty_shelf():
+    """Empty shelf is always compliant (confirmed by organizers)."""
+    samples = [{"product": "empty"}, {"product": "empty"}]
+    expected = "BANANA DA MADEIRA CNT KG"
+    assert family_compliant(samples, expected) is True
