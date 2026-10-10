@@ -1,6 +1,6 @@
 import numpy as np
 
-from sensei.geometry import context_crop, encode_png, warp_area
+from sensei.geometry import context_crop, encode_png, fruit_fraction, warp_area
 
 
 def _image() -> np.ndarray:
@@ -45,3 +45,22 @@ def test_encode_png_roundtrip():
     assert data[:2] == b"\xff\xd8"
     decoded = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
     assert decoded.shape == img.shape
+
+
+def test_fruit_fraction_bare_vs_produce():
+    bare = np.full((64, 64, 3), (40, 40, 40), dtype=np.uint8)      # dark shelf -> ~0
+    yellow = np.full((64, 64, 3), (0, 255, 255), dtype=np.uint8)    # saturated -> ~1
+    assert fruit_fraction(bare) < 0.05
+    assert fruit_fraction(yellow) > 0.95
+
+
+def test_fruit_fraction_uses_mask():
+    # left half produce-like, right half black padding; mask says only left is valid
+    crop = np.zeros((64, 64, 3), dtype=np.uint8)
+    crop[:, :32] = (0, 255, 255)   # BGR yellow on the left half
+    mask = np.zeros((64, 64), dtype=np.uint8)
+    mask[:, :32] = 1
+    # masked: only valid (left) pixels count -> all produce
+    assert fruit_fraction(crop, mask) > 0.95
+    # unmasked: black right half dilutes it
+    assert 0.4 < fruit_fraction(crop, None) < 0.6

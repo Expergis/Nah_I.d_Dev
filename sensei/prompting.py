@@ -17,6 +17,9 @@ PROMPT_TEMPLATE = """You are inspecting one shelf area (a gondola slot) in the f
 Image 1 is the area of interest, perspective-corrected into a rectangle.{context_note}{visible_note}
 
 EXPECTED PRODUCT (from the store planogram): "{product_name}" (product id {product_id}).
+This is ONLY a reference for the compliance comparison below. Do NOT assume the area is
+stocked with it. Many areas in this store are EMPTY (a bare dark shelf, no produce).
+Judge the STOCK solely from what is actually visible in the crop.
 
 Answer two questions:
 
@@ -32,6 +35,7 @@ Answer two questions:
    - "full": substantially stocked, covering most of the usable area (above ~70).
 
 STRICT RULES:
+- Do not infer stock from the expected product. If you do not clearly see sellable produce inside the area, stock_level must be "empty" and coverage_percent near 0. An empty shelf is compliant, not a mismatch.
 - Black padding or dark regions outside the real shelf are pixels OUTSIDE the camera image. Never treat them as an empty shelf.
 - Ignore human hands, arms and bodies; estimate the stock behind them when possible, otherwise mark compliance/visibility accordingly.
 - Do not invent details hidden by occlusion.

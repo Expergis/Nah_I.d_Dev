@@ -23,7 +23,7 @@ from .decision import (
     decide_stock,
     to_output,
 )
-from .geometry import context_crop, encode_png, warp_area
+from .geometry import context_crop, encode_png, fruit_fraction, warp_area
 from .output import make_skeleton, validate_output
 from .planogram import Planogram, PlanogramArea
 from .timing import RunStats
@@ -148,9 +148,27 @@ async def process_area(
             area.area_id, wall, samples_ok, cfg.samples, cached,
         )
 
-    crop, _mask, visible = warp_area(
+    crop, mask, visible = warp_area(
         image, area.corners, cfg.crop_width, cfg.crop_height
     )
+
+    # Colour safety-net: bare shelves are unambiguous. Skipping the model both
+    # saves inference cost and prevents re-priming an empty shelf as "the
+    # expected product, full". Empty => compliant (confirmed by organizers).
+    if cfg.fruit_threshold > 0:
+        frac = fruit_fraction(crop, mask)
+        if frac < cfg.fruit_threshold:
+            _record(0)
+            log.info(
+                "area %s: colour short-circuit (fruit=%.3f < %.3f) -> empty",
+                area.area_id, frac, cfg.fruit_threshold,
+            )
+            return {
+                "planogram_compliant": True,
+                "stock_level": "empty",
+                "stock_value": 0.0,
+            }
+
     ctx = None
     if cfg.include_context:
         ctx = context_crop(image, area.corners, cfg.context_padding)

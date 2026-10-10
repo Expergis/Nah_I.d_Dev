@@ -59,6 +59,9 @@ class Config:
     crop_height: int = 384
     context_padding: float = 0.30  # fraction of the area span added around it
     include_context: bool = True   # also send a wider shelf view
+    fruit_threshold: float = 0.05  # 0 disables; if a crop's fruit_fraction is below
+                                   # this, skip the model and call the area empty
+
 
     # --- runtime --------------------------------------------------------
     max_concurrency: int = 1      # 1 for 8GB VRAM (avoid KV cache overflow)
@@ -85,6 +88,7 @@ class Config:
             crop_height=_env_int("SENSEI_CROP_H", 384),
             context_padding=_env_float("SENSEI_CONTEXT_PAD", 0.30),
             include_context=_env_bool("SENSEI_INCLUDE_CONTEXT", True),
+            fruit_threshold=_env_float("SENSEI_FRUIT_THR", 0.05),
             max_concurrency=_env_int("SENSEI_CONCURRENCY", 1),
             timeout_s=_env_float("SENSEI_TIMEOUT_S", 240.0),
             max_retries=_env_int("SENSEI_RETRIES", 4),

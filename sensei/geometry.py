@@ -55,6 +55,26 @@ def warp_area(
     return crop, mask, visible_fraction
 
 
+def fruit_fraction(crop: Array, mask: Array | None = None) -> float:
+    """Fraction of (valid) shelf pixels that look like produce.
+
+    "Produce-like" = saturated (S>90) and bright (V>90) in HSV. Bare dark
+    shelves and gray/black padding score near 0; yellow/orange/red/green
+    produce scores high. When ``mask`` is given, only valid in-image pixels
+    are counted so off-image padding can't skew the fraction. This is a cheap
+    proxy for "is there actually produce here?" and doubles as a safety-net
+    against the VLM re-priming an empty shelf as the expected product.
+    """
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+    fruit = (hsv[..., 1] > 90) & (hsv[..., 2] > 90)
+    if mask is not None:
+        m = mask.astype(bool)
+        if not m.any():
+            return 0.0
+        return float(fruit[m].mean())
+    return float(fruit.mean())
+
+
 def context_crop(
     image: Array,
     corners: tuple | list,
