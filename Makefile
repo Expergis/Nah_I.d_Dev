@@ -31,6 +31,16 @@ setup:
 	$(PYTHON) -m pip install -r requirements-gpu.txt
 	@echo "Setup complete. Run: make test"
 
+## Full GPU machine setup (Ubuntu): driver check, Ollama, models, torch, DINOv2, smoke test
+## Usage: make setup-gpu   (or: bash scripts/setup_gpu.sh)
+setup-gpu:
+	bash scripts/setup_gpu.sh
+
+## Full GPU machine setup (Windows/PowerShell): driver check, Ollama, models, torch, DINOv2, smoke test
+## Usage: make setup-gpu-win
+setup-gpu-win:
+	powershell -ExecutionPolicy Bypass -File scripts/setup_gpu.ps1
+
 ## Run unit tests
 test:
 	$(PYTHON) -m pytest tests/ -v
