@@ -1,4 +1,5 @@
 from sensei.decision import (
+    best_level_from_probs,
     decide_compliance,
     decide_stock,
     expected_stock_scores,
@@ -38,6 +39,12 @@ def test_maximum_uncertainty_prefers_empty():
     best = max(ev, key=ev.get)
     assert best == "empty"
     assert decide_stock({"empty": 1, "half": 1, "full": 1}) == "empty"
+
+
+def test_best_level_from_probs():
+    assert best_level_from_probs(0.2, 0.35, 0.45) == "half"
+    assert best_level_from_probs(1 / 3, 1 / 3, 1 / 3) == "empty"
+    assert best_level_from_probs(0.05, 0.1, 0.85) == "full"
 
 
 def test_compliance_threshold():

@@ -17,6 +17,7 @@ from .config import Config
 from .decision import (
     COMPLIANCE_LABELS,
     STOCK_LEVELS,
+    best_level_from_probs,
     decide_compliance,
     decide_stock,
     to_output,
@@ -25,9 +26,12 @@ from .geometry import context_crop, encode_png, warp_area
 from .output import make_skeleton, validate_output
 from .planogram import Planogram, PlanogramArea
 from .prompting import build_prompt
-from .vlm import VLMClient, VLMError
+from .vlm import VLMClient
+from .vlm_ollama import OllamaClient
 
 log = logging.getLogger(__name__)
+
+Backend = VLMClient | OllamaClient
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -76,6 +80,7 @@ async def process_area(
 
     votes_stock: dict[str, int] = {}
     votes_comp: dict[str, int] = {}
+    explicit_probs: list[dict] = []
     async with semaphore:
         results = await asyncio.gather(
             *(client.ask_json(prompt, images, cfg.temperature) for _ in range(cfg.samples)),
@@ -92,6 +97,9 @@ async def process_area(
         compliance = result.get("compliance")
         if compliance in COMPLIANCE_LABELS:
             votes_comp[compliance] = votes_comp.get(compliance, 0) + 1
+        probs = result.get("_p")
+        if probs:
+            explicit_probs.append(probs)
 
     if not votes_stock:
         log.error("no usable samples for %s -> fallback", area.area_id)
@@ -101,7 +109,15 @@ async def process_area(
             "stock_value": 0.0,
         }
 
-    level = decide_stock(votes_stock)
+    if explicit_probs:
+        # logprobs path: average first-token probabilities, then EV rule
+        p = {
+            k: sum(q.get(k, 0.0) for q in explicit_probs) / len(explicit_probs)
+            for k in STOCK_LEVELS
+        }
+        level = best_level_from_probs(p["empty"], p["half"], p["full"])
+    else:
+        level = decide_stock(votes_stock)
     level_name, level_value = to_output(level)
     return {
         "planogram_compliant": decide_compliance(votes_comp),
@@ -156,15 +172,31 @@ async def run(
 
     output = make_skeleton(planogram, images_by_camera)
 
-    client: VLMClient | None = None
+    client: Backend | None = None
     if not cfg.skip_api:
-        client = VLMClient(
-            model=cfg.model,
-            api_key=cfg.api_key or "",
-            timeout_s=cfg.timeout_s,
-            max_retries=cfg.max_retries,
-            cache_dir=cfg.cache_dir,
-        )
+        if cfg.backend == "gemini":
+            client = VLMClient(
+                model=cfg.model,
+                api_key=cfg.api_key or "",
+                timeout_s=cfg.timeout_s,
+                max_retries=cfg.max_retries,
+                cache_dir=cfg.cache_dir,
+            )
+        else:
+            client = OllamaClient(
+                model=cfg.ollama_model,
+                base_url=cfg.ollama_url,
+                timeout_s=cfg.timeout_s,
+                max_retries=cfg.max_retries,
+                cache_dir=cfg.cache_dir,
+                num_ctx=cfg.ollama_num_ctx,
+            )
+            if not await client.ping():
+                await client.aclose()
+                raise RuntimeError(
+                    f"Ollama not reachable at {cfg.ollama_url}. "
+                    "Start it (setup_gpu.ps1) or use SENSEI_BACKEND=gemini."
+                )
 
     semaphore = asyncio.Semaphore(cfg.max_concurrency)
     try:

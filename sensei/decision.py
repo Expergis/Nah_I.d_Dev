@@ -55,14 +55,19 @@ def expected_stock_scores(p_empty: float, p_half: float, p_full: float) -> dict[
     }
 
 
+def best_level_from_probs(p_empty: float, p_half: float, p_full: float) -> str:
+    """Pick the stock level maximizing expected score from probabilities."""
+    evs = expected_stock_scores(p_empty, p_half, p_full)
+    return max(evs, key=evs.get)
+
+
 def decide_stock(votes: dict[str, int]) -> str:
     """Pick the stock level maximizing expected score from sample votes."""
     total = sum(votes.get(k, 0) for k in STOCK_LEVELS)
     if total <= 0:
         return FALLBACK["stock_level"]
     p = {k: votes.get(k, 0) / total for k in STOCK_LEVELS}
-    evs = expected_stock_scores(p["empty"], p["half"], p["full"])
-    return max(evs, key=evs.get)
+    return best_level_from_probs(p["empty"], p["half"], p["full"])
 
 
 def decide_compliance(votes: dict[str, int]) -> bool:

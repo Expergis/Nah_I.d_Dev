@@ -45,8 +45,12 @@ class Config:
     output_path: str = "outputs/predictions.json"
 
     # --- model ----------------------------------------------------------
+    backend: str = "ollama"   # "ollama" (local, default) or "gemini" (API booster)
     model: str = DEFAULT_MODEL
     api_key: str | None = None
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen3-vl:8b"
+    ollama_num_ctx: int = 8192
     samples: int = 3          # VLM samples (votes) per area
     temperature: float = 0.6  # sampling temperature (diversity for votes)
 
@@ -69,7 +73,11 @@ class Config:
             planogram_path=_env("SENSEI_PLANOGRAM", "data/planogram.json"),
             images_dir=_env("SENSEI_IMAGES_DIR", "data/images"),
             output_path=_env("SENSEI_OUTPUT", "outputs/predictions.json"),
+            backend=_env("SENSEI_BACKEND", "ollama").lower(),
             model=_env("SENSEI_MODEL", DEFAULT_MODEL),
+            ollama_url=_env("SENSEI_OLLAMA_URL", "http://localhost:11434"),
+            ollama_model=_env("SENSEI_OLLAMA_MODEL", "qwen3-vl:8b"),
+            ollama_num_ctx=_env_int("SENSEI_OLLAMA_CTX", 8192),
             api_key=os.environ.get("GEMINI_API_KEY") or None,
             samples=_env_int("SENSEI_SAMPLES", 3),
             temperature=_env_float("SENSEI_TEMPERATURE", 0.6),
