@@ -24,6 +24,13 @@ if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
     exit 1
 }
 ollama --version
+# VRAM-optimized settings for 8GB GPU (set before ollama serve)
+$env:OLLAMA_NUM_PARALLEL = "1"
+$env:OLLAMA_MAX_LOADED_MODELS = "1"
+$env:OLLAMA_KEEP_ALIVE = "-1"
+$env:OLLAMA_FLASH_ATTENTION = "1"
+$env:OLLAMA_KV_CACHE_TYPE = "q8_0"
+
 ollama serve *> $null &  # no-op guard if already running; the service usually autostarts
 
 Write-Host "`n=== [3/6] Pull models (primary, fallback, second-opinion) ===" -ForegroundColor Cyan

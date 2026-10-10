@@ -44,9 +44,16 @@ if ! command -v ollama &>/dev/null; then
 fi
 ollama --version
 
+# Set VRAM-optimization env vars for 8GB GPU
+export OLLAMA_NUM_PARALLEL=1
+export OLLAMA_MAX_LOADED_MODELS=1
+export OLLAMA_KEEP_ALIVE=-1
+export OLLAMA_FLASH_ATTENTION=1
+export OLLAMA_KV_CACHE_TYPE=q8_0
+
 # Start the Ollama service if not already running
 if ! curl -s http://localhost:11434/api/tags &>/dev/null; then
-    echo "Starting Ollama service..."
+    echo "Starting Ollama service with VRAM-optimized settings..."
     sudo systemctl start ollama 2>/dev/null || sudo systemctl enable --now ollama 2>/dev/null || \
         (nohup ollama serve > /tmp/ollama.log 2>&1 &)
     sleep 2

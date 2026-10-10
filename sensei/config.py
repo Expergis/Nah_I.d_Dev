@@ -50,18 +50,18 @@ class Config:
     api_key: str | None = None
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "qwen3-vl:8b"
-    ollama_num_ctx: int = 8192
+    ollama_num_ctx: int = 4096
     samples: int = 3          # VLM samples (votes) per area
     temperature: float = 0.6  # sampling temperature (diversity for votes)
 
     # --- geometry -------------------------------------------------------
-    crop_width: int = 640
-    crop_height: int = 448
-    context_padding: float = 0.35  # fraction of the area span added around it
+    crop_width: int = 512
+    crop_height: int = 384
+    context_padding: float = 0.30  # fraction of the area span added around it
     include_context: bool = True   # also send a wider shelf view
 
     # --- runtime --------------------------------------------------------
-    max_concurrency: int = 6
+    max_concurrency: int = 1      # 1 for 8GB VRAM (avoid KV cache overflow)
     timeout_s: float = 90.0
     max_retries: int = 4
     cache_dir: str = ".cache/vlm"

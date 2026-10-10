@@ -83,8 +83,8 @@ def context_crop(
 
 
 def encode_png(image: Array) -> bytes:
-    """Encode a BGR image as PNG bytes for the API payload."""
-    ok, buffer = cv2.imencode(".png", image)
+    """Encode a BGR image as JPEG bytes for the API payload (smaller than PNG)."""
+    ok, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 90])
     if not ok:
-        raise ValueError("Failed to encode image as PNG")
+        raise ValueError("Failed to encode image as JPEG")
     return buffer.tobytes()

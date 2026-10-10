@@ -91,6 +91,7 @@ class OllamaClient:
             "options": {"temperature": 0.6, "num_ctx": self.num_ctx},
             "logprobs": True,
             "logprobs_token_count": 8,
+            "keep_alive": -1,
             "messages": [
                 {
                     "role": "user",
