@@ -27,7 +27,7 @@ if ! command -v nvidia-smi &>/dev/null; then
     warn "Then reboot and re-run this script."
     exit 1
 fi
-nvidia-smi | head -14
+nvidia-smi 2>/dev/null | head -14 || true
 
 # ---------------------------------------------------------------------------
 step "[2/6] Ollama"
@@ -51,7 +51,7 @@ if ! curl -s http://localhost:11434/api/tags &>/dev/null; then
         (nohup ollama serve > /tmp/ollama.log 2>&1 &)
     sleep 2
 fi
-echo "Ollama reachable: $(curl -s http://localhost:11434/api/tags | head -c 80)..."
+echo "Ollama reachable: $(curl -s http://localhost:11434/api/tags 2>/dev/null | head -c 80 || true)..."
 
 # ---------------------------------------------------------------------------
 step "[3/6] Pull models (primary, fallback, second-opinion)"
