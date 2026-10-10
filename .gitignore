@@ -12,3 +12,6 @@ outputs/
 
 # Environment
 .env
+
+# Team-only notes (never commit)
+TEAM_NOTES.md
