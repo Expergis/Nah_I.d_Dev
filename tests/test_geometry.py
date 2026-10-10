@@ -41,6 +41,7 @@ def test_encode_png_roundtrip():
 
     img = _image()
     data = encode_png(img)
-    assert data[:4] == b"\x89PNG"
+    # encode_png() now emits JPEG (smaller payloads for the VLM)
+    assert data[:2] == b"\xff\xd8"
     decoded = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
     assert decoded.shape == img.shape
