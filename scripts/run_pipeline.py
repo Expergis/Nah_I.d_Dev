@@ -68,7 +68,7 @@ def main() -> int:
     for cam in sorted(images_by_cam):
         print(f"  {cam}: {len(images_by_cam[cam])} images")
 
-    output = asyncio.run(run(cfg, planogram, camera=args.camera, image=args.image))
+    output, stats = asyncio.run(run(cfg, planogram, camera=args.camera, image=args.image))
 
     out_path = args.out or cfg.output_path
     save_output(output, out_path)
@@ -76,6 +76,10 @@ def main() -> int:
     problems = validate_output(output, planogram, images_by_cam)
     areas = sum(len(img) for cam in output.values() for img in cam.values())
     print(f"\nWrote {out_path}: {areas} area predictions")
+    print(stats.summary())
+    stats_path = Path(out_path).parent / "timing.json"
+    stats_path.write_text(json.dumps(stats.as_dict(), indent=2), encoding="utf-8")
+    print(f"Wrote {stats_path}")
     if problems:
         print(f"VALIDATION PROBLEMS ({len(problems)}):")
         for problem in problems[:20]:

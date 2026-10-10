@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from pathlib import Path
 
 import cv2
@@ -25,6 +26,7 @@ from .decision import (
 from .geometry import context_crop, encode_png, warp_area
 from .output import make_skeleton, validate_output
 from .planogram import Planogram, PlanogramArea
+from .timing import RunStats
 from .prompting import build_prompt
 from .vlm import VLMClient
 from .vlm_ollama import OllamaClient
@@ -104,8 +106,48 @@ async def process_area(
     client: VLMClient | None,
     cfg: Config,
     semaphore: asyncio.Semaphore,
+    camera_id: str = "",
+    image_name: str = "",
+    stats: "RunStats | None" = None,
 ) -> dict:
     """One area -> one prediction dict (always returns a valid entry)."""
+    t0 = time.perf_counter()
+
+    def _record(samples_ok: int, results_: list[object] | None = None) -> None:
+        if stats is None:
+            return
+        cached = 0
+        prompt_tokens = decode_tokens = 0
+        prefill_ms = decode_ms = 0.0
+        for r in results_ or []:
+            if isinstance(r, Exception):
+                continue
+            t = r.get("_t") or {}
+            if t.get("cached"):
+                cached += 1
+            prompt_tokens += int(t.get("prompt_tokens") or 0)
+            decode_tokens += int(t.get("decode_tokens") or 0)
+            prefill_ms += float(t.get("prefill_ms") or 0.0)
+            decode_ms += float(t.get("decode_ms") or 0.0)
+        wall = time.perf_counter() - t0
+        stats.record_area(
+            camera=camera_id,
+            image=image_name,
+            area_id=area.area_id,
+            wall_s=wall,
+            samples_ok=samples_ok,
+            samples_total=cfg.samples,
+            cached_calls=cached,
+            prompt_tokens=prompt_tokens,
+            decode_tokens=decode_tokens,
+            prefill_ms=prefill_ms,
+            decode_ms=decode_ms,
+        )
+        log.info(
+            "area %s: %.2fs (%d/%d samples ok, %d cached)",
+            area.area_id, wall, samples_ok, cfg.samples, cached,
+        )
+
     crop, _mask, visible = warp_area(
         image, area.corners, cfg.crop_width, cfg.crop_height
     )
@@ -115,6 +157,7 @@ async def process_area(
 
     if client is None:
         # dry-run / no API: keep the conservative fallback
+        _record(0)
         return dict({
             "planogram_compliant": True,
             "stock_level": "empty",
@@ -135,10 +178,12 @@ async def process_area(
             return_exceptions=True,
         )
 
+    samples_ok = 0
     for result in results:
         if isinstance(result, Exception):
             log.warning("sample failed for %s: %s", area.area_id, result)
             continue
+        samples_ok += 1
         level = result.get("stock_level")
         if level in STOCK_LEVELS:
             votes_stock[level] = votes_stock.get(level, 0) + 1
@@ -151,6 +196,7 @@ async def process_area(
 
     if not votes_stock:
         log.error("no usable samples for %s -> fallback", area.area_id)
+        _record(samples_ok, results)
         return {
             "planogram_compliant": True,
             "stock_level": "empty",
@@ -167,6 +213,7 @@ async def process_area(
     else:
         level = decide_stock(votes_stock)
     level_name, level_value = to_output(level)
+    _record(samples_ok, results)
     return {
         "planogram_compliant": decide_compliance(votes_comp),
         "stock_level": level_name,
@@ -181,7 +228,9 @@ async def process_image(
     client: VLMClient | None,
     cfg: Config,
     semaphore: asyncio.Semaphore,
+    stats: "RunStats | None" = None,
 ) -> dict:
+    t0 = time.perf_counter()
     image = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
     if image is None:
         raise ValueError(f"Could not read image: {image_path}")
@@ -190,12 +239,24 @@ async def process_image(
     result = {area.area_id: None for area in areas}  # type: ignore[dict-item]
     tasks = {
         area.area_id: asyncio.create_task(
-            process_area(area, image, client, cfg, semaphore)
+            process_area(
+                area, image, client, cfg, semaphore,
+                camera_id=camera_id,
+                image_name=image_path.name,
+                stats=stats,
+            )
         )
         for area in areas
     }
     for area_id, task in tasks.items():
         result[area_id] = await task
+    if stats is not None:
+        wall = time.perf_counter() - t0
+        stats.record_image(camera_id, image_path.name, wall)
+        log.info(
+            "image %s/%s: %.1fs (%d areas)",
+            camera_id, image_path.name, wall, len(areas),
+        )
     return result
 
 
@@ -250,12 +311,13 @@ async def run(
                 )
 
     semaphore = asyncio.Semaphore(cfg.max_concurrency)
+    stats = RunStats()
     try:
         for cam_id, image_names in images_by_camera.items():
             for name in image_names:
                 path = resolve_image_path(cfg.images_dir, cam_id, name)
                 output[cam_id][name] = await process_image(
-                    cam_id, path, planogram, client, cfg, semaphore
+                    cam_id, path, planogram, client, cfg, semaphore, stats=stats
                 )
                 log.info("done %s / %s (%d areas)", cam_id, name, len(image_names and output[cam_id][name]))
     finally:
@@ -267,4 +329,4 @@ async def run(
         log.error("output validation found %d problems:", len(problems))
         for problem in problems[:20]:
             log.error("  %s", problem)
-    return output
+    return output, stats

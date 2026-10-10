@@ -17,6 +17,7 @@ import hashlib
 import json
 import math
 import random
+import time
 from pathlib import Path
 
 import httpx
@@ -130,7 +131,9 @@ class OllamaClient:
     ) -> dict:
         cache_file = self._cache_file(prompt, images, temperature)
         if cache_file.exists():
-            return json.loads(cache_file.read_text(encoding="utf-8"))
+            result = json.loads(cache_file.read_text(encoding="utf-8"))
+            result["_t"] = {"cached": True, "wall_s": 0.0}
+            return result
 
         body = self._request_body(prompt, images)
         body["options"]["temperature"] = temperature
@@ -139,6 +142,7 @@ class OllamaClient:
         last_error: Exception | None = None
         for attempt in range(self.max_retries + 1):
             try:
+                t0 = time.perf_counter()
                 response = await self._http.post(url, json=body)
                 if response.status_code >= 400:
                     raise OllamaError(
@@ -155,6 +159,15 @@ class OllamaClient:
                 probs = self.extract_level_probs(payload)
                 if probs:
                     result["_p"] = probs
+                # Ollama reports durations in nanoseconds; convert to ms.
+                result["_t"] = {
+                    "cached": False,
+                    "wall_s": round(time.perf_counter() - t0, 3),
+                    "prompt_tokens": int(payload.get("prompt_eval_count") or 0),
+                    "decode_tokens": int(payload.get("eval_count") or 0),
+                    "prefill_ms": round((payload.get("prompt_eval_duration") or 0) / 1e6, 1),
+                    "decode_ms": round((payload.get("eval_duration") or 0) / 1e6, 1),
+                }
                 cache_file.write_text(
                     json.dumps(result, ensure_ascii=False), encoding="utf-8"
                 )

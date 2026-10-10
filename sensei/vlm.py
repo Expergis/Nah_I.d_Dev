@@ -11,6 +11,7 @@ import base64
 import hashlib
 import json
 import random
+import time
 from pathlib import Path
 
 import httpx
@@ -120,7 +121,9 @@ class VLMClient:
         """One structured-JSON completion. Cached. Retries transient failures."""
         cache_file = self._cache_file(prompt, images, temperature)
         if cache_file.exists():
-            return json.loads(cache_file.read_text(encoding="utf-8"))
+            result = json.loads(cache_file.read_text(encoding="utf-8"))
+            result["_t"] = {"cached": True, "wall_s": 0.0}
+            return result
 
         body = self._request_body(prompt, images)
         body["generationConfig"]["temperature"] = temperature
@@ -129,12 +132,23 @@ class VLMClient:
         last_error: Exception | None = None
         for attempt in range(self.max_retries + 1):
             try:
+                t0 = time.perf_counter()
                 response = await self._http.post(url, json=body)
                 if response.status_code in RETRYABLE_STATUS:
                     raise VLMError(f"HTTP {response.status_code}: {response.text[:300]}")
                 if response.status_code >= 400:
                     raise VLMError(f"HTTP {response.status_code}: {response.text[:500]}")
-                result = self._parse_response(response.json())
+                payload = response.json()
+                result = self._parse_response(payload)
+                usage = payload.get("usageMetadata") or {}
+                result["_t"] = {
+                    "cached": False,
+                    "wall_s": round(time.perf_counter() - t0, 3),
+                    "prompt_tokens": int(usage.get("promptTokenCount") or 0),
+                    "decode_tokens": int(usage.get("candidatesTokenCount") or 0),
+                    "prefill_ms": 0.0,
+                    "decode_ms": 0.0,
+                }
                 cache_file.write_text(
                     json.dumps(result, ensure_ascii=False), encoding="utf-8"
                 )
