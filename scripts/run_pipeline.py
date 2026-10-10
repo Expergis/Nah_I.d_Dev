@@ -48,8 +48,8 @@ def main() -> int:
         overrides["model"] = args.model
 
     cfg = Config.from_env(**overrides)
-    if not cfg.skip_api and not cfg.api_key:
-        print("ERROR: GEMINI_API_KEY is not set (or use --dry-run).", file=sys.stderr)
+    if not cfg.skip_api and cfg.backend == "gemini" and not cfg.api_key:
+        print("ERROR: GEMINI_API_KEY is not set (or use --dry-run / SENSEI_BACKEND=ollama).", file=sys.stderr)
         return 2
 
     planogram = Planogram.load(cfg.planogram_path)

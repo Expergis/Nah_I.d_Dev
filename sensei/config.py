@@ -40,7 +40,7 @@ def _env_bool(name: str, default: bool) -> bool:
 @dataclass
 class Config:
     # --- data locations -------------------------------------------------
-    planogram_path: str = "data/planogram.json"
+    planogram_path: str = "planogram.json"
     images_dir: str = "data/images"
     output_path: str = "outputs/predictions.json"
 
@@ -70,22 +70,22 @@ class Config:
     @classmethod
     def from_env(cls, **overrides: object) -> "Config":
         cfg = cls(
-            planogram_path=_env("SENSEI_PLANOGRAM", "data/planogram.json"),
+            planogram_path=_env("SENSEI_PLANOGRAM", "planogram.json"),
             images_dir=_env("SENSEI_IMAGES_DIR", "data/images"),
             output_path=_env("SENSEI_OUTPUT", "outputs/predictions.json"),
             backend=_env("SENSEI_BACKEND", "ollama").lower(),
             model=_env("SENSEI_MODEL", DEFAULT_MODEL),
             ollama_url=_env("SENSEI_OLLAMA_URL", "http://localhost:11434"),
             ollama_model=_env("SENSEI_OLLAMA_MODEL", "qwen3-vl:8b"),
-            ollama_num_ctx=_env_int("SENSEI_OLLAMA_CTX", 8192),
+            ollama_num_ctx=_env_int("SENSEI_OLLAMA_CTX", 4096),
             api_key=os.environ.get("GEMINI_API_KEY") or None,
             samples=_env_int("SENSEI_SAMPLES", 3),
             temperature=_env_float("SENSEI_TEMPERATURE", 0.6),
-            crop_width=_env_int("SENSEI_CROP_W", 640),
-            crop_height=_env_int("SENSEI_CROP_H", 448),
-            context_padding=_env_float("SENSEI_CONTEXT_PAD", 0.35),
+            crop_width=_env_int("SENSEI_CROP_W", 512),
+            crop_height=_env_int("SENSEI_CROP_H", 384),
+            context_padding=_env_float("SENSEI_CONTEXT_PAD", 0.30),
             include_context=_env_bool("SENSEI_INCLUDE_CONTEXT", True),
-            max_concurrency=_env_int("SENSEI_CONCURRENCY", 6),
+            max_concurrency=_env_int("SENSEI_CONCURRENCY", 1),
             timeout_s=_env_float("SENSEI_TIMEOUT_S", 90.0),
             max_retries=_env_int("SENSEI_RETRIES", 4),
             cache_dir=_env("SENSEI_CACHE_DIR", ".cache/vlm"),
