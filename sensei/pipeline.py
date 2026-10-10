@@ -27,6 +27,7 @@ from .planogram import Planogram, PlanogramArea
 from .prompting import build_prompt
 from .vlm import VLMClient, VLMError
 from .vlm_openrouter import OpenRouterClient
+from .vlm_llamacpp import LlamaCppClient
 
 try:
     from .vlm_ollama import OllamaClient  # type: ignore
@@ -35,7 +36,7 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-Backend = VLMClient | OpenRouterClient
+Backend = VLMClient | OpenRouterClient | LlamaCppClient
 
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
@@ -260,8 +261,24 @@ async def run(
                     f"Ollama not reachable at {cfg.ollama_url}. "
                     "Start it or use --backend gemini / --backend openrouter."
                 )
+        elif cfg.backend == "llamacpp":
+            client = LlamaCppClient(
+                base_url=cfg.llamacpp_url,
+                model=cfg.llamacpp_model,
+                timeout_s=cfg.timeout_s,
+                max_retries=cfg.max_retries,
+                cache_dir=cfg.cache_dir,
+                no_cache=cfg.no_cache,
+            )
+            if not await client.ping():
+                await client.aclose()
+                raise RuntimeError(
+                    f"llama-server not reachable at {cfg.llamacpp_url}. "
+                    "Start it with: llama-server -m <model.gguf> --mmproj <mmproj.gguf> "
+                    "--cont-batching --parallel 4 -ngl 99"
+                )
         else:
-            raise ValueError(f"Unknown backend: {cfg.backend}. Choose 'gemini', 'openrouter', or 'ollama'.")
+            raise ValueError(f"Unknown backend: {cfg.backend}. Choose 'gemini', 'openrouter', 'ollama', or 'llamacpp'.")
 
     semaphore = asyncio.Semaphore(cfg.max_concurrency)
     try:

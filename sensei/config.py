@@ -53,6 +53,8 @@ class Config:
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "qwen3-vl:8b"
     ollama_num_ctx: int = 8192
+    llamacpp_url: str = "http://localhost:8080"
+    llamacpp_model: str = "local"
     samples: int = 1          # VLM samples (votes) per area
     temperature: float = 0.2  # sampling temperature
 
@@ -89,6 +91,8 @@ class Config:
             ollama_url=_env("SENSEI_OLLAMA_URL", "http://localhost:11434"),
             ollama_model=_env("SENSEI_OLLAMA_MODEL", "qwen3-vl:8b"),
             ollama_num_ctx=_env_int("SENSEI_OLLAMA_CTX", 8192),
+            llamacpp_url=_env("SENSEI_LLAMACPP_URL", "http://localhost:8080"),
+            llamacpp_model=_env("SENSEI_LLAMACPP_MODEL", "local"),
             api_key=api_key,
             samples=_env_int("SENSEI_SAMPLES", 1),
             temperature=_env_float("SENSEI_TEMPERATURE", 0.2),

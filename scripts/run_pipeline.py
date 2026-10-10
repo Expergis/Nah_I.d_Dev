@@ -37,8 +37,8 @@ def main() -> int:
         help="Run without API calls: tests geometry, cropping, skeleton, and safe fallbacks",
     )
     parser.add_argument("--samples", type=int, default=None, help="Number of VLM samples per area")
-    parser.add_argument("--backend", choices=["gemini", "openrouter", "ollama"], default=None,
-                        help="Backend to use: gemini, openrouter, or ollama")
+    parser.add_argument("--backend", choices=["gemini", "openrouter", "ollama", "llamacpp"], default=None,
+                        help="Backend to use: gemini, openrouter, ollama, or llamacpp")
     parser.add_argument("--model", default=None, help="VLM model identifier override")
     parser.add_argument("--no-cache", action="store_true", help="Bypass local disk cache and force fresh API calls")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose debug logging")
