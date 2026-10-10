@@ -149,3 +149,17 @@ def test_family_compliant_empty_shelf():
     samples = [{"product": "empty"}, {"product": "empty"}]
     expected = "BANANA DA MADEIRA CNT KG"
     assert family_compliant(samples, expected) is True
+
+
+def test_family_split_visually_distinct_varieties():
+    """Varieties that look different must not be grouped (a swap is detectable)."""
+    assert family("PIMENTO VERDE CNT KG") != family("PIMENTO VERMELHO CNT KG")
+    assert family("COUVE ROXA CNT KG") != family("COUVE BRANCA CNT KG")
+    assert family("COUVE BROCOLO CNT KG") != family("COUVE PORTUGUESA/PENCA CNT KG")
+    assert family("UVA RED GLOBE CNT KG") != family("UVA BRANCA S/ GRAINHA CNT KG")
+    assert family("CEBOLA ROXA CNT KG") != family("CEBOLA NOVA CNT KG")
+    assert family("PITAYA AMARELA 200G") != family("PITAYA VERMELHA 300G")
+    # same-looking variants stay grouped
+    assert family("UVA BRANCA S/ GRAINHA CNT KG") == family("UVA BRANCA S/GRAINHA CNT 500 G")
+    assert family("CEBOLA ROXA CNT KG") == family("CEBOLA ROXA CNT 1KG")
+    assert family("BANANA CAT I CNT KG") == family("BANANA DA MADEIRA CNT KG")

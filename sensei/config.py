@@ -65,6 +65,7 @@ class Config:
     # Avoids dark-produce misfires (aubergine, black grapes, mushrooms in shadow).
     dark_threshold: float = 0.60   # 0 disables the net entirely
     fruit_max: float = 0.06        # max fruit fraction allowed for the override to fire
+    texture_max: float = 0.04      # max Canny edge density (bare shelf is smooth, produce is busy)
 
 
     # --- runtime --------------------------------------------------------
@@ -95,6 +96,7 @@ class Config:
             fruit_threshold=_env_float("SENSEI_FRUIT_THR", 0.05),
             dark_threshold=_env_float("SENSEI_DARK_THR", 0.60),
             fruit_max=_env_float("SENSEI_FRUIT_MAX", 0.06),
+            texture_max=_env_float("SENSEI_TEXTURE_MAX", 0.04),
             max_concurrency=_env_int("SENSEI_CONCURRENCY", 1),
             timeout_s=_env_float("SENSEI_TIMEOUT_S", 240.0),
             max_retries=_env_int("SENSEI_RETRIES", 4),

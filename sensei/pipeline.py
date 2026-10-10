@@ -157,11 +157,13 @@ async def process_area(
     # This avoids dark-produce misfires (aubergine, black grapes, mushrooms in shadow).
     # Empty => compliant (confirmed by organizers).
     feats = shelf_features(crop)
-    if cfg.dark_threshold > 0 and feats["dark"] > cfg.dark_threshold and feats["fruit"] < cfg.fruit_max:
+    if (cfg.dark_threshold > 0 and feats["dark"] > cfg.dark_threshold
+            and feats["fruit"] < cfg.fruit_max and feats["texture"] < cfg.texture_max):
         _record(0)
         log.info(
-            "area %s: colour short-circuit (dark=%.3f>%.2f, fruit=%.3f<%.3f) -> empty",
+            "area %s: colour short-circuit (dark=%.3f>%.2f, fruit=%.3f<%.3f, texture=%.3f<%.3f) -> empty",
             area.area_id, feats["dark"], cfg.dark_threshold, feats["fruit"], cfg.fruit_max,
+            feats["texture"], cfg.texture_max,
         )
         return {
             "planogram_compliant": True,

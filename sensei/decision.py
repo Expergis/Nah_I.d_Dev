@@ -91,7 +91,11 @@ def decide_compliance(votes: dict[str, int]) -> bool:
 # product name and we compare against the planogram locally.
 # This avoids false non-compliance on near-identical SKUs (e.g. two banana types).
 
-SPLIT: list[str] = ["BATATA DOCE", "ALHO FRANCO", "COUVE FLOR"]
+SPLIT: list[str] = ["BATATA DOCE", "ALHO FRANCO", "COUVE FLOR",
+                   # visually distinct varieties sharing a first word (colour / shape differ)
+                   "COUVE ROXA", "COUVE BROCOLO", "COUVE BRANCA", "COUVE PORTUGUESA",
+                   "PIMENTO VERDE", "PIMENTO VERMELHO", "UVA RED", "UVA BRANCA",
+                   "CEBOLA ROXA", "PITAYA AMARELA", "PITAYA VERMELHA"]
 ALIAS: dict[str, str] = {"CITR": "CITRINOS", "MELAO": "MELOA", "MINI": "TOMATE"}
 
 
