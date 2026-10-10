@@ -1,0 +1,818 @@
+{
+ "6215": {
+  "1751045755.jpg": {
+   "6215_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6215_2": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6215_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6215_4": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6215_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6215_6": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6215_7": {
+    "compliant": false,
+    "stock": "full",
+    "sure": true
+   },
+   "6215_8": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6215_9": {
+    "compliant": false,
+    "stock": "half",
+    "sure": false
+   },
+   "6215_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6371": {
+  "1751048342.jpg": {
+   "6371_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6371_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6371_3": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6371_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6371_5": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6371_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6371_7": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6371_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6371_9": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6373": {
+  "1751048467.jpg": {
+   "6373_1": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6373_2": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6373_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6373_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6373_5": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6373_6": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6373_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6373_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6373_9": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6373_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6373_11": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6373_12": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6376": {
+  "1751049028.jpg": {
+   "6376_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6376_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_3": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": false
+   },
+   "6376_4": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6376_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6376_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_7": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6376_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_9": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_11": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_12": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_13": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_14": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6376_15": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6376_16": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6383": {
+  "1751048924.jpg": {
+   "6383_1": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6383_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6383_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6383_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6383_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6383_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6383_7": {
+    "compliant": false,
+    "stock": "empty",
+    "sure": false
+   },
+   "6383_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6383_9": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   }
+  }
+ },
+ "6385": {
+  "1751051814.jpg": {
+   "6385_1": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6385_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6385_3": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6385_4": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6385_5": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6385_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6385_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6385_8": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6385_9": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6386": {
+  "1751048137.jpg": {
+   "6386_1": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6386_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6386_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6386_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6386_5": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6386_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6443": {
+  "1751044079.jpg": {
+   "6443_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_3": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6443_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6443_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_9": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6443_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_11": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6443_12": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6443_13": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6462": {
+  "1751047858.jpg": {
+   "6462_1": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6462_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6462_3": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6462_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6462_5": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": false
+   },
+   "6462_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6462_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6462_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6462_9": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   }
+  }
+ },
+ "6468": {
+  "1751048837.jpg": {
+   "6468_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_9": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6468_10": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6468_11": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_12": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_13": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_14": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6468_15": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6468_16": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6491": {
+  "1751048611.jpg": {
+   "6491_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6491_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6491_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6491_4": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6491_5": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6491_6": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6491_7": {
+    "compliant": true,
+    "stock": "empty",
+    "sure": true
+   },
+   "6491_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": false
+   },
+   "6491_9": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6491_10": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   }
+  }
+ },
+ "6591": {
+  "1751048487.jpg": {
+   "6591_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_5": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6591_6": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6591_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_9": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6591_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6594": {
+  "1751049768.jpg": {
+   "6594_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_3": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_4": {
+    "compliant": true,
+    "stock": "half",
+    "sure": false
+   },
+   "6594_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_8": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6594_9": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_11": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6594_12": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6594_13": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ },
+ "6781": {
+  "1751049846.jpg": {
+   "6781_1": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_2": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_3": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6781_4": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_5": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_6": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_7": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_8": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   },
+   "6781_9": {
+    "compliant": true,
+    "stock": "half",
+    "sure": true
+   },
+   "6781_10": {
+    "compliant": true,
+    "stock": "full",
+    "sure": true
+   }
+  }
+ }
+}

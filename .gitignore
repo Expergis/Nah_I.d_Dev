@@ -25,3 +25,4 @@ predictions.debug.json
 crops/
 *.bak*
 tree.txt
+eval/runs/
