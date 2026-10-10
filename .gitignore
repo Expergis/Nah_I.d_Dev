@@ -1,14 +1,52 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
 .venv/
 venv/
+ENV/
+env/
 
-# Local data, outputs and caches
-data/*
-!data/README.md
-outputs/
-.cache/
-
-# Environment
+# Environment Variables
 .env
+.env.local
+
+# Data files (images & raw data)
+data/
+cache/
+output/
+*.jpg
+*.jpeg
+*.png
+*.mp4
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

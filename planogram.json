@@ -1,0 +1,76 @@
+{
+  "Frutas e Legumes": {
+    "cameras": {
+      "6215": {
+        "products": [
+          {
+            "area_id": "6215_1",
+            "product_id": "11908",
+            "product_name": "BANANA CAT I CNT KG",
+            "image_coordinates": {
+              "top_left": [150, 350],
+              "top_right": [295, 348],
+              "bottom_right": [310, 438],
+              "bottom_left": [170, 438]
+            }
+          },
+          {
+            "area_id": "6215_2",
+            "product_id": "11908",
+            "product_name": "BANANA CAT I CNT KG",
+            "image_coordinates": {
+              "top_left": [299, 350],
+              "top_right": [464, 347],
+              "bottom_right": [479, 438],
+              "bottom_left": [331, 438]
+            }
+          },
+          {
+            "area_id": "6215_3",
+            "product_id": "11908",
+            "product_name": "BANANA CAT I CNT KG",
+            "image_coordinates": {
+              "top_left": [468, 347],
+              "top_right": [630, 345],
+              "bottom_right": [645, 436],
+              "bottom_left": [490, 438]
+            }
+          },
+          {
+            "area_id": "6215_4",
+            "product_id": "12045",
+            "product_name": "LARANJA DO ALGARVE IGP KG",
+            "image_coordinates": {
+              "top_left": [175, 450],
+              "top_right": [320, 450],
+              "bottom_right": [335, 540],
+              "bottom_left": [185, 540]
+            }
+          },
+          {
+            "area_id": "6215_5",
+            "product_id": "12045",
+            "product_name": "LARANJA DO ALGARVE IGP KG",
+            "image_coordinates": {
+              "top_left": [338, 450],
+              "top_right": [485, 448],
+              "bottom_right": [500, 540],
+              "bottom_left": [348, 540]
+            }
+          },
+          {
+            "area_id": "6215_6",
+            "product_id": "12045",
+            "product_name": "LARANJA DO ALGARVE IGP KG",
+            "image_coordinates": {
+              "top_left": [502, 448],
+              "top_right": [650, 445],
+              "bottom_right": [665, 538],
+              "bottom_left": [510, 538]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

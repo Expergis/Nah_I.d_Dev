@@ -1,97 +1,55 @@
-# Sensei — Fruits & Vegetables Shelf Monitoring
+# 🍌 Fresh Eyes on Fresh Produce — Shelf Monitoring Solution
+> Autonomous shelf monitoring solution built for the **Sensei Challenge** at **JunctionX Lisbon 2026**.
 
-JunctionX Lisbon 2026 · Sensei challenge.
+## 📌 Problem & Overview
+Fruits and vegetables in autonomous stores are sold loose, piled, unstandardized, and change appearance over time.
+This system leverages ceiling camera imagery and store planograms (`planogram.json`) to autonomously:
+1. **Detect & verify products** against the expected planogram (`planogram_compliant`).
+2. **Estimate stock levels** (`empty`, `half`, `full` / `0.0`, `0.5`, `1.0`).
+3. **Score with conservative loss-minimization**: Specifically optimized for the challenge's asymmetric penalty matrix (overestimating stock carries a severe −3 point penalty).
 
-Detect, count and check loose produce on each gondola area against the
-planogram, from ceiling-camera images — with **zero manual annotation**.
+---
 
-## Approach
+## 🚀 Quick Start
 
-The planogram gives us the hard part: exact per-area coordinates. So the
-pipeline is:
-
-1. **Geometry** — perspective-warp each planogram quadrilateral into a
-   rectified crop, plus a visibility mask (off-image areas are flagged,
-   never confused with empty shelves) and a wider context view.
-2. **VLM inspection** — Gemini (structured JSON output) answers two
-   questions per area: *compliance* (closed-set vs expected product) and
-   *stock* (coverage % + empty/half/full). N samples per area = votes.
-3. **Risk-sensitive decision** — the official scoring is asymmetric
-   (over-calling stock costs −3, under-calling −2), so we pick the level
-   with the highest **expected score** from the vote probabilities — not a
-   blanket conservative bias.
-4. **Guaranteed completeness** — the output skeleton is pre-filled for
-   every planogram area; an API failure yields a documented fallback,
-   never a missing area (missing = −5).
-
-## Layout
-
-```
-sensei/           # pipeline package
-  config.py       # env-driven config (SENSEI_*, GEMINI_API_KEY)
-  planogram.py    # planogram.json loader
-  geometry.py     # quad warp, visibility mask, context crop
-  vlm.py          # async Gemini REST client (cache + retries)
-  prompting.py    # per-area prompt builder
-  decision.py     # expected-value decision rule
-  pipeline.py     # orchestration
-  output.py       # exact submission format + validator
-scripts/
-  run_pipeline.py # CLI entry point
-  contact_sheet.py# labeled crop grids for manual audit
-  audit_report.py # predictions vs manual audit labels
-audit/            # team's manual labels (calibration set)
-data/             # dataset (git-ignored)
-```
-
-## Setup
-
+### 1. Setup Environment
 ```bash
-python -m venv .venv
-.venv\Scripts\activate        # Windows
+make setup
+# Or manually:
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-set GEMINI_API_KEY=...        # or put it in .env
+cp .env.example .env
 ```
 
-## Usage
+### 2. Configure API Keys
+Edit `.env` and configure:
+```env
+GEMINI_API_KEY=your_key_here
+VLM_PROVIDER=gemini
+```
 
+### 3. Run Pipeline
 ```bash
-# sanity check without any API calls
-python scripts/run_pipeline.py --dry-run
-
-# one camera / one image (cheap iteration)
-python scripts/run_pipeline.py --camera 6215 --image 1751052241.jpg
-
-# full run -> outputs/predictions.json (exact submission format)
-python scripts/run_pipeline.py
+python3 scripts/run_pipeline.py --data-dir data/validation --output output/predictions.json
 ```
 
-## Tests
-
+### 4. Evaluate Score
 ```bash
-python -m pytest tests/ -q
+python3 scripts/validate.py --predictions output/predictions.json --annotations data/annotations.json
 ```
 
-## Decision rule (official scoring)
+### 5. Launch Dashboard (UI/UX)
+```bash
+streamlit run app.py
+```
 
-| predict \ truth | empty | half | full |
-|---|---|---|---|
-| **empty** | +1 | −2 | −2 |
-| **half** | −3 | +1 | −2 |
-| **full** | −3 | −3 | +1 |
+---
 
-`EV(empty)=pE−2pH−2pF` · `EV(half)=−3pE+pH−2pF` · `EV(full)=−3pE−3pH+pF`
-
-Compliance: predict compliant iff its vote share ≥ noncompliant's
-(+1/−2 asymmetry → threshold 0.5; ties go to compliant, the base rate).
-
-## Roadmap (hackathon hours)
-
-- [x] skeleton, geometry, client, decision layer, validator
-- [ ] first live end-to-end run on real data
-- [ ] audit set labelling (~100 areas) + threshold calibration
-- [ ] reference-image prompting (full/empty references per area)
-- [ ] second-model routing on low-agreement areas
-- [ ] temporal consistency checks across timestamps
-- [ ] Streamlit staff view (colored quads + prioritized action list)
-- [ ] 2-minute pitch
+## 🏗️ Architecture & Modules
+- `src/planogram.py`: Parses quadrilateral planogram coordinate areas per camera. Handles edge boundary overflows.
+- `src/image_processor.py`: Perspective transformation engine with padding support for negative camera coordinates.
+- `src/vision_engine.py`: Multi-provider VLM pipeline with response caching, retry backoffs, and conservative uncertainty calibration.
+- `src/prompt_templates.py`: Domain-specific prompts with Portuguese grocery taxonomy and scoring guardrails.
+- `src/scoring.py`: Exact reproduction of the challenge's official points matrix.
+- `app.py`: Real-time and pre-cached Streamlit dashboard designed for store operators.

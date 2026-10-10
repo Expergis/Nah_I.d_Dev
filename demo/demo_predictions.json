@@ -1,0 +1,36 @@
+{
+  "6215": {
+    "1751052241.jpg": {
+      "6215_1": {
+        "planogram_compliant": true,
+        "stock_level": "full",
+        "stock_value": 1.0
+      },
+      "6215_2": {
+        "planogram_compliant": true,
+        "stock_level": "half",
+        "stock_value": 0.5
+      },
+      "6215_3": {
+        "planogram_compliant": true,
+        "stock_level": "full",
+        "stock_value": 1.0
+      },
+      "6215_4": {
+        "planogram_compliant": false,
+        "stock_level": "half",
+        "stock_value": 0.5
+      },
+      "6215_5": {
+        "planogram_compliant": true,
+        "stock_level": "empty",
+        "stock_value": 0.0
+      },
+      "6215_6": {
+        "planogram_compliant": true,
+        "stock_level": "full",
+        "stock_value": 1.0
+      }
+    }
+  }
+}
