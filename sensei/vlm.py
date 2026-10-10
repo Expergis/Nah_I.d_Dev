@@ -54,7 +54,7 @@ class VLMClient:
     ):
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not set")
-        self.model = model
+        self.model = model.removeprefix("models/")
         self.timeout_s = timeout_s
         self.max_retries = max_retries
         self._cache_dir = Path(cache_dir)
