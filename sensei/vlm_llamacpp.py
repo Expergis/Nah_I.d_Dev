@@ -93,6 +93,7 @@ class LlamaCppClient:
             "model": self.model,
             "messages": [{"role": "user", "content": content_parts}],
             "temperature": temperature,
+            "max_tokens": 250,
         }
 
     # -- response parsing -------------------------------------------------

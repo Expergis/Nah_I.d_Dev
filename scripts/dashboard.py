@@ -50,7 +50,7 @@ for c in stock_counts.values():
         p = c / total_areas
         entropy -= p * math.log2(p)
 
-tabs = st.tabs(["📊 Executive Overview", "🔬 Deep Model Diagnostics & Optimizations", "📷 Camera Explorer & Alerts"])
+tabs = st.tabs(["📊 Executive Overview", "⚔️ Model Comparison Arena", "🔬 Deep Model Diagnostics & Optimizations", "📷 Camera Explorer & Alerts"])
 
 # ----------------- TAB 1: EXECUTIVE OVERVIEW -----------------
 with tabs[0]:
@@ -87,8 +87,33 @@ with tabs[0]:
         else:
             st.success(f"✅ Conservative stock posture ({full_pct:.1f}% FULL). Maximizes Expected Value (EV).")
 
-# ----------------- TAB 2: DIAGNOSTICS & OPTIMIZATION -----------------
+# ----------------- TAB 2: MODEL COMPARISON ARENA -----------------
 with tabs[1]:
+    st.subheader("⚔️ Cross-Model Benchmark Matrix")
+    benchmark_dir = Path("output/benchmarks")
+    saved_benchmarks = list(benchmark_dir.glob("*.json")) if benchmark_dir.exists() else []
+
+    if saved_benchmarks:
+        bench_data = []
+        for bp in saved_benchmarks:
+            try:
+                b_info = json.loads(bp.read_text(encoding="utf-8"))
+                bench_data.append({
+                    "Model": b_info.get("model_name"),
+                    "Backend": b_info.get("backend"),
+                    "Compliance %": f"{b_info.get('compliance_rate_pct')}%",
+                    "Entropy": b_info.get("entropy"),
+                    "Overcall Risk (% Full)": f"{b_info.get('overcall_risk_full_pct')}%",
+                    "Score (if Ground Truth)": b_info.get("ground_truth_score", "N/A"),
+                })
+            except Exception:
+                pass
+        st.dataframe(pd.DataFrame(bench_data), use_container_width=True)
+    else:
+        st.info("No saved model snapshots found in `output/benchmarks/`. Save snapshots using: `.venv/bin/python scripts/compare_models.py save --name <model-name>`")
+
+# ----------------- TAB 3: DIAGNOSTICS & OPTIMIZATION -----------------
+with tabs[2]:
     st.subheader("🔬 Optimization Opportunities & Visual Reasoning Audit")
     
     # Audit Cache
@@ -128,8 +153,8 @@ with tabs[1]:
         else:
             st.info("No cached reasoning logs found yet. Run pipeline without `--no-cache` to view rationale logs.")
 
-# ----------------- TAB 3: CAMERA EXPLORER -----------------
-with tabs[2]:
+# ----------------- TAB 4: CAMERA EXPLORER -----------------
+with tabs[3]:
     selected_cam = st.sidebar.selectbox("Select Camera", sorted(list(predictions.keys())))
     images_for_cam = predictions.get(selected_cam, {})
     selected_img = st.sidebar.selectbox("Select Timestamp", sorted(list(images_for_cam.keys())))
