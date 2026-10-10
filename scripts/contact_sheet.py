@@ -16,8 +16,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import cv2  # noqa: E402
 
+from sensei.config import Config  # noqa: E402
 from sensei.geometry import warp_area  # noqa: E402
-from sensei.pipeline import list_images  # noqa: E402
+from sensei.pipeline import list_images_per_camera, resolve_image_path  # noqa: E402
 from sensei.planogram import Planogram  # noqa: E402
 
 TILE_W, TILE_H = 320, 224
@@ -49,7 +50,18 @@ def main() -> int:
     parser.add_argument("--out", default=None, help="output dir (default: sheets/)")
     args = parser.parse_args()
 
-    images = list_images("data/images")
+    cfg = Config.from_env()
+    planogram = Planogram.load(cfg.planogram_path)
+    areas = planogram.areas_for(args.camera)
+    if not areas:
+        print(f"no areas for camera {args.camera}", file=sys.stderr)
+        return 1
+
+    images = list_images_per_camera(cfg.images_dir, [args.camera]).get(args.camera, [])
+    if not images:
+        print(f"no images found for camera {args.camera}", file=sys.stderr)
+        return 1
+
     if args.all_images:
         selected = images
     elif args.image:
@@ -60,18 +72,12 @@ def main() -> int:
     else:
         selected = [images[0]]
 
-    planogram = Planogram.load("data/planogram.json")
-    areas = planogram.areas_for(args.camera)
-    if not areas:
-        print(f"no areas for camera {args.camera}", file=sys.stderr)
-        return 1
-
     out_dir = Path(args.out or "sheets")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rows = (len(areas) + args.cols - 1) // args.cols
     for name in selected:
-        image = cv2.imread(f"data/images/{name}", cv2.IMREAD_COLOR)
+        image = cv2.imread(str(resolve_image_path(cfg.images_dir, args.camera, name)), cv2.IMREAD_COLOR)
         if image is None:
             print(f"could not read {name}", file=sys.stderr)
             continue

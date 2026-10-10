@@ -37,6 +37,7 @@ IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 
 
 def list_images(images_dir: str | Path) -> list[str]:
+    """Flat-layout image listing (legacy; prefer list_images_per_camera)."""
     images_dir = Path(images_dir)
     if not images_dir.is_dir():
         raise FileNotFoundError(f"Images directory not found: {images_dir}")
@@ -48,6 +49,53 @@ def list_images(images_dir: str | Path) -> list[str]:
     if not files:
         raise FileNotFoundError(f"No images found in {images_dir}")
     return files
+
+
+def list_images_per_camera(
+    base_dir: str | Path,
+    camera_ids: list[str],
+) -> dict[str, list[str]]:
+    """Discover images per camera.
+
+    Supports two layouts:
+    - Per-camera folders:  base_dir/<cam_id>/<timestamp>.jpg
+    - Flat shared folder:  base_dir/<timestamp>.jpg  (same set for all cameras)
+    """
+    base_dir = Path(base_dir)
+    if not base_dir.is_dir():
+        raise FileNotFoundError(f"Images directory not found: {base_dir}")
+
+    per_camera: dict[str, list[str]] = {}
+    for cam_id in camera_ids:
+        cam_dir = base_dir / cam_id
+        if cam_dir.is_dir():
+            files = sorted(
+                p.name for p in cam_dir.iterdir()
+                if p.is_file() and p.suffix.lower() in IMAGE_SUFFIXES
+            )
+            if files:
+                per_camera[cam_id] = files
+
+    if per_camera:
+        return per_camera
+
+    # Flat layout fallback: all cameras share the same image set
+    files = sorted(
+        p.name for p in base_dir.iterdir()
+        if p.is_file() and p.suffix.lower() in IMAGE_SUFFIXES
+    )
+    if not files:
+        raise FileNotFoundError(f"No images found in {base_dir}")
+    return {cam_id: list(files) for cam_id in camera_ids}
+
+
+def resolve_image_path(base_dir: str | Path, cam_id: str, image_name: str) -> Path:
+    """Build the file path for an image, handling both per-camera and flat layouts."""
+    base_dir = Path(base_dir)
+    cam_dir = base_dir / cam_id
+    if cam_dir.is_dir():
+        return cam_dir / image_name
+    return base_dir / image_name
 
 
 async def process_area(
@@ -161,14 +209,17 @@ async def run(
     if planogram is None:
         planogram = Planogram.load(cfg.planogram_path)
 
-    all_images = list_images(cfg.images_dir)
-    if image:
-        all_images = [name for name in all_images if name == image or Path(name).stem == image]
-    if not all_images:
-        raise FileNotFoundError(f"Image not found: {image}")
-
     cameras = [camera] if camera else planogram.cameras()
-    images_by_camera = {cam: all_images for cam in cameras if cam in planogram.cameras()}
+    valid_cameras = [cam for cam in cameras if cam in planogram.cameras()]
+    images_by_camera = list_images_per_camera(cfg.images_dir, valid_cameras)
+    if image:
+        images_by_camera = {
+            cam: [n for n in names if n == image or Path(n).stem == image]
+            for cam, names in images_by_camera.items()
+        }
+        images_by_camera = {cam: imgs for cam, imgs in images_by_camera.items() if imgs}
+        if not images_by_camera:
+            raise FileNotFoundError(f"Image not found: {image}")
 
     output = make_skeleton(planogram, images_by_camera)
 
@@ -202,7 +253,7 @@ async def run(
     try:
         for cam_id, image_names in images_by_camera.items():
             for name in image_names:
-                path = Path(cfg.images_dir) / name
+                path = resolve_image_path(cfg.images_dir, cam_id, name)
                 output[cam_id][name] = await process_image(
                     cam_id, path, planogram, client, cfg, semaphore
                 )

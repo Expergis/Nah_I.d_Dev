@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from sensei.config import Config  # noqa: E402
 from sensei.output import save_output, validate_output  # noqa: E402
-from sensei.pipeline import list_images, run  # noqa: E402
+from sensei.pipeline import list_images_per_camera, run  # noqa: E402
 from sensei.planogram import Planogram  # noqa: E402
 
 
@@ -54,19 +54,26 @@ def main() -> int:
 
     planogram = Planogram.load(cfg.planogram_path)
     print(f"Planogram: {len(planogram.cameras())} cameras, {len(planogram)} areas")
-    images = list_images(cfg.images_dir)
-    print(f"Images: {len(images)} ({images[0]} ... {images[-1]})")
+
+    cams = [args.camera] if args.camera else planogram.cameras()
+    images_by_cam = list_images_per_camera(cfg.images_dir, [c for c in cams if c in planogram.cameras()])
+    if args.image:
+        images_by_cam = {
+            cam: [n for n in names if n == args.image or Path(n).stem == args.image]
+            for cam, names in images_by_cam.items()
+        }
+        images_by_cam = {cam: imgs for cam, imgs in images_by_cam.items() if imgs}
+    total = sum(len(imgs) for imgs in images_by_cam.values())
+    print(f"Images: {total} total across {len(images_by_cam)} cameras")
+    for cam in sorted(images_by_cam):
+        print(f"  {cam}: {len(images_by_cam[cam])} images")
 
     output = asyncio.run(run(cfg, planogram, camera=args.camera, image=args.image))
 
     out_path = args.out or cfg.output_path
     save_output(output, out_path)
 
-    images_by_camera = {
-        cam: ([args.image] if args.image else images)
-        for cam in ([args.camera] if args.camera else planogram.cameras())
-    }
-    problems = validate_output(output, planogram, images_by_camera)
+    problems = validate_output(output, planogram, images_by_cam)
     areas = sum(len(img) for cam in output.values() for img in cam.values())
     print(f"\nWrote {out_path}: {areas} area predictions")
     if problems:
