@@ -137,6 +137,8 @@ def main() -> int:
     ap.add_argument("--k", type=int, default=7)
     ap.add_argument("--mismatch-share", type=float, default=0.7,
                     help="flag non-compliant only if this share of neighbours is another family")
+    ap.add_argument("--stock-only", action="store_true",
+                    help="student decides stock only; every area is predicted compliant")
     a = ap.parse_args()
 
     from sklearn.linear_model import LogisticRegression
@@ -179,7 +181,7 @@ def main() -> int:
         else:
             lvl = LEVELS[rl.best_level(list(P[i]))]
             comp = True
-            if lvl != "empty" and len(nb_X):
+            if lvl != "empty" and len(nb_X) and not a.stock_only:
                 sims = nb_X[:, :D] @ Xte[i, :D]
                 idx = [j for j in np.argsort(-sims) if nb_area[j] != aid][: a.k]
                 top, n = Counter(nb_fam[j] for j in idx).most_common(1)[0]
@@ -199,7 +201,7 @@ def main() -> int:
             pts -= 3; above += 1
     dt = time.time() - t0
     n = len(te_keys)
-    print(f"\nSTUDENT ({emb.name}) on the {n} hand-labelled test areas:")
+    print(f"\nSTUDENT ({emb.name}{', stock only' if a.stock_only else ''}) on the {n} hand-labelled test areas:")
     print(f"  points {pts}/{2 * n}   id ok {ok_id}   stock ok {ok_st}   below {below}   above {above}")
     print(f"  {dt:.1f}s for {len(test_imgs)} images = {dt / len(test_imgs):.2f}s per image (incl. embedding, CPU)")
     return 0
