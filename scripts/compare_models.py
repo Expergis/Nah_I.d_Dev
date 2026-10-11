@@ -47,9 +47,9 @@ def run_model(model: str, images: dict, a) -> tuple[dict, dict, float]:
         t0 = time.time()
         r = subprocess.run(cmd, capture_output=True, text=True)
         wall += time.time() - t0
-        if r.returncode not in (0, 1):
-            print(r.stdout[-800:], r.stderr[-800:])
-            raise SystemExit(f"run_local failed for {model} {cam}")
+        if r.returncode not in (0, 1) or not out.exists():
+            print(r.stdout[-1500:], r.stderr[-1500:])
+            raise SystemExit(f"run_local failed for {model} {cam} (exit {r.returncode})")
         if "had no model answer" in r.stdout:
             print(f"  ! {model} {cam}: some areas fell back (no model answer)")
         preds.update(json.loads(out.read_text(encoding="utf-8")))
