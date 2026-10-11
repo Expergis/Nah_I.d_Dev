@@ -3,7 +3,7 @@
 Examples:
     python run_local.py --camera 6215 --limit 1 --save-crops crops   # smoke test
     python run_local.py                                              # full run
-    python run_local.py --samples 3 --model qwen3-vl:8b-instruct
+    python run_local.py --model qwen3-vl:4b-instruct --workers 2   # submission settings
 """
 from __future__ import annotations
 
@@ -360,10 +360,10 @@ def main():
     ap.add_argument("--camera")
     ap.add_argument("--image", help="filename or stem")
     ap.add_argument("--limit", type=int, help="max images per camera (smoke tests)")
-    ap.add_argument("--model", default="qwen3-vl:8b-instruct")
+    ap.add_argument("--model", default="qwen3-vl:4b-instruct")
     ap.add_argument("--host", default="http://localhost:11434")
     ap.add_argument("--samples", type=int, default=1)
-    ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--num-ctx", type=int, default=4096)
     ap.add_argument("--timeout", type=int, default=180)
     ap.add_argument("--crop-w", type=int, default=512)
