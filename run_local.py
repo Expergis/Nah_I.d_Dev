@@ -406,8 +406,13 @@ def main():
             continue
         cam_dir = Path(a.images_dir) / cam
         if not cam_dir.is_dir():
-            print(f"! no image folder for camera {cam}: {cam_dir}")
-            continue
+            # tolerate other layouts: a folder named <camera_id> at any depth
+            found = sorted(p for p in Path(a.images_dir).rglob(cam) if p.is_dir())
+            if not found:
+                print(f"! no image folder for camera {cam} under {a.images_dir}")
+                continue
+            cam_dir = found[0]
+            print(f"  camera {cam}: using {cam_dir}")
         files = sorted(p for p in cam_dir.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
         if a.image:
             files = [p for p in files if a.image in (p.name, p.stem)]

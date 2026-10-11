@@ -17,6 +17,7 @@ sheets/
 
 # Team-only notes (never commit)
 TEAM_NOTES.md
+PITCH.md
 
 # run_local.py outputs and answer cache
 .cache_local/
@@ -24,5 +25,7 @@ predictions.json
 predictions.debug.json
 crops/
 *.bak*
-tree.txt
 eval/runs/
+
+# Pitch script (private)
+PITCH.md
